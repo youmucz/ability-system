@@ -30,7 +30,7 @@ namespace Minikit.AbilitySystem
         // --------------------
         public int stacks { get; private set; } = 0;
 
-        protected MKAbilityComponent masComponent;
+        protected MKAbilityComponent abilityComponent;
         protected float timeOfApplied = 0f;
         // ------------------------
         // ----- END INSTANCE -----
@@ -46,9 +46,9 @@ namespace Minikit.AbilitySystem
         }
 
 
-        public void Added(MKAbilityComponent _masComponent)
+        public void Added(MKAbilityComponent _abilityComponent)
         {
-            masComponent = _masComponent;
+            abilityComponent = _abilityComponent;
             timeOfApplied = Time.time;
 
             OnAdded();
@@ -65,7 +65,7 @@ namespace Minikit.AbilitySystem
 
             if (GetDurationRemaining() < 0f)
             {
-                masComponent.RemoveEffect(typeTag);
+                abilityComponent.RemoveEffect(typeTag);
             }
         }
 
