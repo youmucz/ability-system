@@ -132,4 +132,4 @@ namespace Minikit.AbilitySystem
             }
         }
     }
-} // Minicrit.MAS namespace
+} // Minikit.AbilitySystem namespace

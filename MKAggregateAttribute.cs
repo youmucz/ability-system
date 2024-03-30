@@ -107,4 +107,4 @@ namespace Minikit.AbilitySystem
             OnCurrentValueChanged.Invoke(oldCurrentValue, currentValue);
         }
     }
-} // Minicrit.MAS namespace
+} // Minikit.AbilitySystem namespace

@@ -25,4 +25,4 @@ namespace Minikit.AbilitySystem
             value = _value;
         }
     }
-} // Minicrit.MAS namespace
+} // Minikit.AbilitySystem namespace
