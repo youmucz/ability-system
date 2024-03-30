@@ -87,4 +87,4 @@ namespace Minikit.AbilitySystem
             return !(_lhs == _rhs);
         }
     }
-} // Minicrit.MAS namespace
+} // Minikit.AbilitySystem namespace

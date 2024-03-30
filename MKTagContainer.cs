@@ -113,4 +113,4 @@ namespace Minikit.AbilitySystem
             return GetEnumerator();
         }
     }
-} // Minicrit.MAS namespace
+} // Minikit.AbilitySystem namespace

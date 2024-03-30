@@ -82,4 +82,4 @@ namespace Minikit.AbilitySystem.Internal
             return null;
         }
     }
-} // Minicrit.MAS namespace
+} // Minikit.AbilitySystem namespace
