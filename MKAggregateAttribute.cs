@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Minikit.Abilities
+namespace Minikit.AbilitySystem
 {
     /// <summary> Aggregate attributes can add and remove modifiers as desired. Best use cases for aggregate attributes are values that don't change their base, but will be modifier and unmodifier often </summary>
     public class MKAggregateAttribute

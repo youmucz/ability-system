@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Minikit.Abilities
+namespace Minikit.AbilitySystem
 {
     /// <summary> Fixed attributes cannot undo any modifiers that are applied. Best use cases for fixed attributes are values that have their base changed often </summary>
     public class MKFixedAttribute

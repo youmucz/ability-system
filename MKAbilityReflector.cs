@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Minikit.Abilities.Internal
+namespace Minikit.AbilitySystem.Internal
 {
     public static class MKAbilityReflector
     {

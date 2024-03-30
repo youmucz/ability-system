@@ -2,9 +2,9 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Minikit.Abilities.Internal;
+using Minikit.AbilitySystem.Internal;
 
-namespace Minikit.Abilities
+namespace Minikit.AbilitySystem
 {
     public class MKAbilityComponent : MonoBehaviour 
     {
