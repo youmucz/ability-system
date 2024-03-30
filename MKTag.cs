@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Minikit.Abilities
+namespace Minikit.AbilitySystem
 {
     public class MKTag : IEquatable<MKTag>
     {
