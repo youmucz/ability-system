@@ -34,7 +34,7 @@ namespace Minikit.AbilitySystem
 
         // ----- INSTANCE -----
         // --------------------
-        public MKAbilityComponent masComponent { get; private set; } = null;
+        public MKAbilityComponent abilityComponent { get; private set; } = null;
         public bool active { get; private set; } = false;
         protected object[] activationParams;
         // ------------------------
@@ -69,12 +69,12 @@ namespace Minikit.AbilitySystem
 
         public virtual bool CanActivate()
         {
-            if (masComponent == null)
+            if (abilityComponent == null)
             {
                 return false;
             }
 
-            if (masComponent.HasAnyGrantedTags(blockedByTags))
+            if (abilityComponent.HasAnyGrantedTags(blockedByTags))
             {
                 return false;
             }
@@ -88,10 +88,10 @@ namespace Minikit.AbilitySystem
 
             active = true;
 
-            MKTagContainer cancelledAbilities = masComponent.GetAllActiveAbilities(cancelAbilityTags);
+            MKTagContainer cancelledAbilities = abilityComponent.GetAllActiveAbilities(cancelAbilityTags);
             if (!cancelledAbilities.IsEmpty())
             {
-                masComponent.CancelAbilities(cancelledAbilities);
+                abilityComponent.CancelAbilities(cancelledAbilities);
             }
 
             OnActivate();
@@ -131,13 +131,13 @@ namespace Minikit.AbilitySystem
         {
             if (cooldownEffectTag != null)
             {
-                masComponent.AddEffect(MKEffect.Create(cooldownEffectTag));
+                abilityComponent.AddEffect(MKEffect.Create(cooldownEffectTag));
             }
         }
 
-        public void Added(MKAbilityComponent _masComponent)
+        public void Added(MKAbilityComponent _abilityComponent)
         {
-            masComponent = _masComponent;
+            abilityComponent = _abilityComponent;
 
             OnAdded();
         }
@@ -147,9 +147,9 @@ namespace Minikit.AbilitySystem
 
         }
 
-        public void Removed(MKAbilityComponent _masComponent)
+        public void Removed(MKAbilityComponent _abilityComponent)
         {
-            masComponent = null;
+            abilityComponent = null;
 
             Cancel();
             OnRemoved();
