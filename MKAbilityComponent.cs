@@ -8,7 +8,7 @@ namespace Minikit.AbilitySystem
 {
     public class MKAbilityComponent : MonoBehaviour 
     {
-        private MKTagContainer looseGrantedTags = new();
+        private List<MKTag> looseGrantedTags = new();
         private Dictionary<MKTag, MKAbility> abilitiesByTag = new();
         private Dictionary<MKTag, MKEffect> effectsByTag = new();
         private Dictionary<MKTag, MKAggregateAttribute> attributesByTag = new();
@@ -155,10 +155,10 @@ namespace Minikit.AbilitySystem
 
         }
 
-        public bool RemoveAbilities(MKTagContainer _tagContainer)
+        public bool RemoveAbilities(List<MKTag> _tagList)
         {
             int numberRemoved = 0;
-            foreach (MKTag tag in _tagContainer)
+            foreach (MKTag tag in _tagList)
             {
                 if (abilitiesByTag.ContainsKey(tag))
                 {
@@ -198,10 +198,10 @@ namespace Minikit.AbilitySystem
             return false;
         }
 
-        public bool CancelAbilities(MKTagContainer _tagContainer)
+        public bool CancelAbilities(List<MKTag> _tagList)
         {
             int numberCancelled = 0;
-            foreach (MKTag tag in _tagContainer)
+            foreach (MKTag tag in _tagList)
             {
                 if (abilitiesByTag.ContainsKey(tag)
                     && abilitiesByTag[tag].active)
@@ -230,9 +230,9 @@ namespace Minikit.AbilitySystem
             return false;
         }
 
-        public bool IsAnyAbilityActive(MKTagContainer _tagContainer)
+        public bool IsAnyAbilityActive(List<MKTag> _tagList)
         {
-            foreach (MKTag tag in _tagContainer)
+            foreach (MKTag tag in _tagList)
             {
                 if (abilitiesByTag.ContainsKey(tag)
                     && abilitiesByTag[tag].active)
@@ -244,24 +244,24 @@ namespace Minikit.AbilitySystem
             return false;
         }
 
-        public MKTagContainer GetAllActiveAbilities(MKTagContainer _tagContainer = null)
+        public List<MKTag> GetAllActiveAbilities(List<MKTag> _tagList = null)
         {
-            MKTagContainer tagContainer = new();
+            List<MKTag> tagList = new();
             foreach (MKAbility ability in abilitiesByTag.Values)
             {
                 if (ability.active
-                    && _tagContainer != null ? _tagContainer.HasTag(ability.typeTag) : true)
+                    && _tagList != null ? _tagList.Contains(ability.typeTag) : true)
                 {
-                    tagContainer.AddTag(ability.typeTag);
+                    tagList.Add(ability.typeTag);
                 }
             }
 
-            return tagContainer;
+            return tagList;
         }
 
         public void AddGrantedLooseTag(MKTag _tag)
         {
-            looseGrantedTags.AddTag(_tag);
+            looseGrantedTags.Add(_tag);
 
             foreach (MKAbility ability in abilitiesByTag.Values)
             {
@@ -275,26 +275,26 @@ namespace Minikit.AbilitySystem
 
         public void RemoveGrantedLooseTag(MKTag _tag)
         {
-            looseGrantedTags.RemoveTag(_tag);
+            looseGrantedTags.Remove(_tag);
         }
 
         public List<MKTag> GetGrantedTags()
         {
-            MKTagContainer tagContainer = new();
-            tagContainer.AddTags(looseGrantedTags);
+            List<MKTag> tagList = new();
+            tagList.AddRange(looseGrantedTags);
             foreach (MKAbility ability in abilitiesByTag.Values)
             {
                 if (ability.active)
                 {
-                    tagContainer.AddTags(ability.grantedTags);
+                    tagList.AddRange(ability.grantedTags);
                 }
             }
             foreach (MKEffect effect in effectsByTag.Values)
             {
-                tagContainer.AddTags(effect.grantedTags);
+                tagList.AddRange(effect.grantedTags);
             }
 
-            return tagContainer.GetTags();
+            return tagList;
         }
 
         public bool HasGrantedTag(MKTag _tag)
@@ -310,11 +310,11 @@ namespace Minikit.AbilitySystem
             return false;
         }
 
-        public bool HasAnyGrantedTags(MKTagContainer _tagContainer)
+        public bool HasAnyGrantedTags(List<MKTag> _tagList)
         {
             foreach (MKTag tag in GetGrantedTags())
             {
-                if (_tagContainer.HasTag(tag))
+                if (_tagList.Contains(tag))
                 {
                     return true;
                 }
@@ -323,11 +323,11 @@ namespace Minikit.AbilitySystem
             return false;
         }
 
-        public bool HasAllGrantedTags(MKTagContainer _tagContainer)
+        public bool HasAllGrantedTags(List<MKTag> _tagList)
         {
             foreach (MKTag tag in GetGrantedTags())
             {
-                if (!_tagContainer.HasTag(tag))
+                if (!_tagList.Contains(tag))
                 {
                     return false;
                 }
