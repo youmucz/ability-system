@@ -162,10 +162,15 @@ namespace Minikit.AbilitySystem
 
         public static MKAbility Create(MKTag _typeTag)
         {
+            return Create<MKAbility>(_typeTag);
+        }
+
+        public static T Create<T>(MKTag _typeTag) where T : MKAbility
+        {
             Type abilityType = MKAbilityReflector.GetRegisteredAbilityType(_typeTag);
             if (abilityType != null)
             {
-                MKAbility abilityInstance = Activator.CreateInstance(abilityType, _typeTag) as MKAbility;
+                T abilityInstance = Activator.CreateInstance(abilityType, _typeTag) as T;
                 if (abilityInstance != null)
                 {
                     abilityInstance.OnPostConstruct();
