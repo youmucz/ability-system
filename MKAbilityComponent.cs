@@ -41,7 +41,7 @@ namespace Minikit.AbilitySystem
 
         protected virtual void UpdateInternal()
         {
-            foreach (MKAbility ability in abilitiesByTag.Values.ToArray())
+            foreach (MKAbility ability in IterateAbilities().ToArray())
             {
                 ability.Tick(Time.deltaTime);
             }
@@ -142,6 +142,10 @@ namespace Minikit.AbilitySystem
             if (abilitiesByTag.ContainsKey(_tag))
             {
                 MKAbility ability = abilitiesByTag[_tag];
+                if (abilitiesByTag[_tag].active)
+                {
+                    abilitiesByTag[_tag].Cancel();
+                }
                 abilitiesByTag.Remove(_tag);
                 OnRemovedAbility(ability);
                 return true;
@@ -160,9 +164,8 @@ namespace Minikit.AbilitySystem
             int numberRemoved = 0;
             foreach (MKTag tag in _tagList)
             {
-                if (abilitiesByTag.ContainsKey(tag))
+                if (RemoveAbility(tag))
                 {
-                    abilitiesByTag.Remove(tag);
                     numberRemoved++;
                 }
             }
@@ -214,6 +217,11 @@ namespace Minikit.AbilitySystem
             return numberCancelled > 0;
         }
 
+        public IEnumerable<MKAbility> IterateAbilities()
+        {
+            return abilitiesByTag.Values;
+        }
+
         public bool HasAbility(MKTag _tag)
         {
             return abilitiesByTag.ContainsKey(_tag);
@@ -247,7 +255,7 @@ namespace Minikit.AbilitySystem
         public List<MKTag> GetAllActiveAbilities(List<MKTag> _tagList = null)
         {
             List<MKTag> tagList = new();
-            foreach (MKAbility ability in abilitiesByTag.Values)
+            foreach (MKAbility ability in IterateAbilities())
             {
                 if (ability.active
                     && _tagList != null ? _tagList.Contains(ability.typeTag) : true)
@@ -263,7 +271,7 @@ namespace Minikit.AbilitySystem
         {
             looseGrantedTags.Add(_tag);
 
-            foreach (MKAbility ability in abilitiesByTag.Values)
+            foreach (MKAbility ability in IterateAbilities())
             {
                 if (ability.active
                     && ability.cancelledByGrantedLooseTags.Contains(_tag))
@@ -282,7 +290,7 @@ namespace Minikit.AbilitySystem
         {
             List<MKTag> tagList = new();
             tagList.AddRange(looseGrantedTags);
-            foreach (MKAbility ability in abilitiesByTag.Values)
+            foreach (MKAbility ability in IterateAbilities())
             {
                 if (ability.active)
                 {
