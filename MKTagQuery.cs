@@ -6,22 +6,22 @@ namespace Minikit.AbilitySystem
 {
     public enum MKTagQueryCondition
     {
-        Any,
-        All,
-        None
+        Any, // At least 1 tag in the query exists in the list of tags being tested against
+        All, // All of the tags in the query exist in the list of tags being tested against
+        None // None of the tags in the query exist in the list of tags being tested against
     }
 
     [System.Serializable]
     public class MKTagQuery
     {
         [SerializeField] private MKTagQueryCondition condition = MKTagQueryCondition.Any;
-        [SerializeField] private List<MKTag> tagContainer = new();
+        [SerializeField] private List<MKTag> tagList = new();
 
 
         public MKTagQuery(MKTagQueryCondition _condition, List<MKTag> _tagList)
         {
             condition = _condition;
-            tagContainer = _tagList;
+            tagList = _tagList;
         }
 
 
@@ -35,27 +35,27 @@ namespace Minikit.AbilitySystem
             switch (condition)
             {
                 case MKTagQueryCondition.Any:
-                    foreach (MKTag tag in _tagList)
+                    foreach (MKTag tag in tagList)
                     {
-                        if (tagContainer.Contains(tag))
+                        if (_tagList.Contains(tag))
                         {
                             return true;
                         }
                     }
                     return false;
                 case MKTagQueryCondition.All:
-                    foreach (MKTag tag in _tagList)
+                    foreach (MKTag tag in tagList)
                     {
-                        if (!tagContainer.Contains(tag))
+                        if (!_tagList.Contains(tag))
                         {
                             return false;
                         }
                     }
                     return true;
                 case MKTagQueryCondition.None:
-                    foreach (MKTag tag in _tagList)
+                    foreach (MKTag tag in tagList)
                     {
-                        if (tagContainer.Contains(tag))
+                        if (_tagList.Contains(tag))
                         {
                             return false;
                         }
