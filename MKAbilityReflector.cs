@@ -8,8 +8,8 @@ namespace Minikit.AbilitySystem.Internal
 {
     public static class MKAbilityReflector
     {
-        public static Dictionary<MKTag, Type> registeredAbilities = new();
-        public static Dictionary<MKTag, Type> registeredEffects = new();
+        private static Dictionary<MKTag, Type> registeredAbilities = new();
+        private static Dictionary<MKTag, Type> registeredEffects = new();
 
 
         static MKAbilityReflector()
