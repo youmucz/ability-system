@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Minikit.AbilitySystem
 {
+    [System.Serializable]
     public enum MKTagQueryCondition
     {
         Any, // At least 1 tag in the query exists in the list of tags being tested against
@@ -32,9 +33,19 @@ namespace Minikit.AbilitySystem
 
         public bool Test(List<MKTag> _tagList)
         {
+            if (tagList == null
+                || tagList.Count == 0)
+            {
+                return true;
+            }
+
             switch (condition)
             {
                 case MKTagQueryCondition.Any:
+                    if (_tagList == null)
+                    {
+                        return false;
+                    }
                     foreach (MKTag tag in tagList)
                     {
                         if (_tagList.Contains(tag))
@@ -44,6 +55,10 @@ namespace Minikit.AbilitySystem
                     }
                     return false;
                 case MKTagQueryCondition.All:
+                    if (_tagList == null)
+                    {
+                        return false;
+                    }
                     foreach (MKTag tag in tagList)
                     {
                         if (!_tagList.Contains(tag))
@@ -53,6 +68,10 @@ namespace Minikit.AbilitySystem
                     }
                     return true;
                 case MKTagQueryCondition.None:
+                    if (_tagList == null)
+                    {
+                        return true;
+                    }
                     foreach (MKTag tag in tagList)
                     {
                         if (_tagList.Contains(tag))
