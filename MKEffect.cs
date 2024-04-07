@@ -21,7 +21,7 @@ namespace Minikit.AbilitySystem
         public MKTag typeTag { get; private set; } = null;
         /// <summary> Tags that are granted to the owning MASComponent while this effect is applied </summary>
         public List<MKTag> grantedTags { get; } = new();
-        public int maxStacks { get; protected set; } = 1;
+        public int maxStacks { get; protected set; } = 1; // -1 for infinite
         protected float duration = 0f;
         // ------------------------
         // ----- END SETTINGS -----
@@ -84,17 +84,30 @@ namespace Minikit.AbilitySystem
 
         }
 
-        public int AddStacks(int _stacks)
+        public virtual int AddStacks(int _stacks)
         {
-            if (_stacks < 0)
+            if (_stacks <= 0)
             {
                 return 0;
             }
 
             int oldStacks = stacks;
-            stacks = Mathf.Clamp(stacks + _stacks, 0, maxStacks);
+            stacks = Mathf.Clamp(stacks + _stacks, 0, maxStacks == -1 ? int.MaxValue : maxStacks);
 
             return stacks - oldStacks;
+        }
+
+        public virtual int RemoveStacks(int _stacks)
+        {
+            if (_stacks <= 0)
+            {
+                return 0;
+            }
+
+            int oldStacks = stacks;
+            stacks = Mathf.Clamp(stacks - _stacks, 0, maxStacks == -1 ? int.MaxValue : maxStacks);
+
+            return oldStacks - stacks;
         }
 
         public float GetDuration()

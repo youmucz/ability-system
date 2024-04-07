@@ -85,25 +85,31 @@ namespace Minikit.AbilitySystem
             return null;
         }
 
-        public bool AddEffect(MKEffect _effect, int _stacks = 1)
+        public bool AddEffectStacks(MKTag _effectTag, int _stacks = 1)
         {
-            if (effectsByTag.ContainsKey(_effect.typeTag))
+            if (_stacks <= 0)
             {
-                if (effectsByTag[_effect.typeTag].AddStacks(_stacks) > 0)
+                return false;
+            }
+
+            if (effectsByTag.ContainsKey(_effectTag))
+            {
+                if (effectsByTag[_effectTag].AddStacks(_stacks) > 0)
                 {
                     return true; // Successfully added more stacks to an existing effect
                 }
-                else
-                {
-                    return false; // Failed to add any stacks to an existing effect
-                }
             }
-            else
-            {
-                effectsByTag.Add(_effect.typeTag, _effect);
-                effectsByTag[_effect.typeTag].Added(this);
-                return true;
-            }
+
+            return false;
+        }
+
+        public bool AddEffect(MKEffect _effect, int _stacks = 1)
+        {
+            effectsByTag.Add(_effect.typeTag, _effect);
+            effectsByTag[_effect.typeTag].Added(this);
+            effectsByTag[_effect.typeTag].AddStacks(_stacks);
+
+            return true;
         }
 
         public bool RemoveEffect(MKTag _tag)
