@@ -27,7 +27,6 @@ namespace Minikit.AbilitySystem.Internal
                         {
                             registeredAbilities.Add(abilityTypeTag, type);
 
-                            Debug.Log($"Registered {typeof(MKAbility).Name}: {type.Name} with tag {abilityTypeTag.key}");
                             continue;
                         }
                         else
@@ -46,7 +45,6 @@ namespace Minikit.AbilitySystem.Internal
                         {
                             registeredEffects.Add(abilityTypeTag, type);
 
-                            Debug.Log($"Registered {typeof(MKEffect).Name}: {type.Name} with tag {abilityTypeTag.key}");
                             continue;
                         }
                         else
