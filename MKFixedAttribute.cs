@@ -1,66 +1,63 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
+using Godot;
+using System;
 
 namespace Minikit.AbilitySystem
 {
     /// <summary> Fixed attributes cannot undo any modifiers that are applied. Best use cases for fixed attributes are values that have their base changed often </summary>
     public class MKFixedAttribute
     {
-        public UnityEvent<float, float> OnValueChanged = new();
+        public readonly Action<float, float> OnValueChanged = delegate { };
 
-        public MKTag tag { get; private set; }
-        public float value { get; private set; }
+        public Tag Tag { get; private set; }
+        public float Value { get; private set; }
 
-
-        public MKFixedAttribute(MKTag _tag, float _value)
+        public MKFixedAttribute(Tag tag, float value)
         {
-            tag = _tag;
-            value = _value;
+            Tag = tag;
+            Value = value;
         }
 
 
         /// <returns> The value after being altered </returns>
-        public float AlterValue(float _delta, float _clampMin = float.MinValue, float _clampMax = float.MaxValue)
+        public float AlterValue(float delta, float clampMin = float.MinValue, float clampMax = float.MaxValue)
         {
-            float oldValue = value;
-            value = Mathf.Clamp(value + _delta, _clampMin, _clampMax);
-            OnValueChanged.Invoke(oldValue, value);
+            var oldValue = Value;
+            Value = Mathf.Clamp(Value + delta, clampMin, clampMax);
+            OnValueChanged.Invoke(oldValue, Value);
 
-            return value;
+            return Value;
         }
 
-        public void SetValue(float _value)
+        public void SetValue(float value)
         {
-            float oldValue = value;
-            value = _value;
-            OnValueChanged.Invoke(oldValue, value);
+            var oldValue = Value;
+            Value = value;
+            OnValueChanged.Invoke(oldValue, Value);
         }
 
         /// <summary> Applies a modifier a single time. This cannot be undone or removed, it permanently alters the value of this attribute </summary>
-        public bool BakeModifier(MKModifier _modifier)
+        public bool BakeModifier(MKModifier modifier)
         {
-            float oldValue = value;
+            var oldValue = Value;
 
-            switch (_modifier.operation)
+            switch (modifier.Operation)
             {
                 case MKModifierOperation.Add:
-                    value += _modifier.value;
+                    Value += modifier.Value;
                     break;
                 case MKModifierOperation.Multiply:
-                    value *= _modifier.value;
+                    Value *= modifier.Value;
                     break;
                 case MKModifierOperation.Override:
-                    value = _modifier.value;
+                    Value = modifier.Value;
                     break;
                 default:
                     // Invalid operation
                     return false;
             }
 
-            OnValueChanged.Invoke(oldValue, value);
+            OnValueChanged.Invoke(oldValue, Value);
             return true;
         }
     }
-} // Minikit.AbilitySystem namespace
+}

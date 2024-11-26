@@ -2,36 +2,35 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
+using Godot;
 
 namespace Minikit.AbilitySystem.Internal
 {
     public static class MKAbilityReflector
     {
-        private static Dictionary<MKTag, Type> registeredAbilities = new();
-        private static Dictionary<MKTag, Type> registeredEffects = new();
-
-
+        private static readonly Dictionary<Tag, Type> RegisteredAbilities = new();
+        private static readonly Dictionary<Tag, Type> RegisteredEffects = new();
+        
         static MKAbilityReflector()
         {
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (Type type in assembly.GetTypes())
+                foreach (var type in assembly.GetTypes())
                 {
                     if (type.IsSubclassOf(typeof(MKAbility))
                         && !type.IsAbstract) // Ignore abstract ability classes since we don't want to register them
                     {
-                        FieldInfo tagFieldInfo = type.GetField(MKAbility.__typeTagFieldName);
-                        MKTag abilityTypeTag = (MKTag)tagFieldInfo.GetValue(null);
+                        var tagFieldInfo = type.GetField(MKAbility.__typeTagFieldName);
+                        var abilityTypeTag = (Tag)tagFieldInfo!.GetValue(null);
                         if (abilityTypeTag != null)
                         {
-                            registeredAbilities.Add(abilityTypeTag, type);
+                            RegisteredAbilities.Add(abilityTypeTag, type);
 
                             continue;
                         }
                         else
                         {
-                            Debug.LogError($"Failed to register {typeof(MKAbility).Name} because field {MKAbility.__typeTagFieldName} wasn't overridden");
+                            GD.PrintErr($"Failed to register {nameof(MKAbility)} because field {MKAbility.__typeTagFieldName} wasn't overridden");
                             continue;
                         }
                     }
@@ -40,44 +39,43 @@ namespace Minikit.AbilitySystem.Internal
                         && !type.IsAbstract)
                     {
                         FieldInfo tagFieldInfo = type.GetField(MKEffect.__typeTagFieldName);
-                        MKTag abilityTypeTag = (MKTag)tagFieldInfo.GetValue(null);
+                        Tag abilityTypeTag = (Tag)tagFieldInfo!.GetValue(null);
                         if (abilityTypeTag != null)
                         {
-                            registeredEffects.Add(abilityTypeTag, type);
+                            RegisteredEffects.Add(abilityTypeTag, type);
 
                             continue;
                         }
                         else
                         {
-                            Debug.LogError($"Failed to register {typeof(MKEffect).Name} because field {MKEffect.__typeTagFieldName} wasn't overridden");
+                            GD.PrintErr($"Failed to register {nameof(MKEffect)} because field {MKEffect.__typeTagFieldName} wasn't overridden");
                             continue;
                         }
                     }
                 }
             }
         }
-
-
-        public static Type GetRegisteredAbilityType(MKTag _tag)
+        
+        public static Type GetRegisteredAbilityType(Tag tag)
         {
-            if (registeredAbilities.ContainsKey(_tag))
+            if (RegisteredAbilities.TryGetValue(tag, out var type))
             {
-                return registeredAbilities[_tag];
+                return type;
             }
 
-            Debug.LogError($"Failed to get registered {typeof(MKAbility).Name} type from tag {_tag.key}");
+            GD.PrintErr($"Failed to get registered {nameof(MKAbility)} type from tag {tag.Key}");
             return null;
         }
 
-        public static Type GetRegisteredEffectType(MKTag _tag)
+        public static Type GetRegisteredEffectType(Tag tag)
         {
-            if (registeredEffects.ContainsKey(_tag))
+            if (RegisteredEffects.TryGetValue(tag, out var type))
             {
-                return registeredEffects[_tag];
+                return type;
             }
 
-            Debug.LogError($"Failed to get registered {typeof(MKEffect).Name} type from tag {_tag.key}");
+            GD.PrintErr($"Failed to get registered {nameof(MKEffect)} type from tag {tag.Key}");
             return null;
         }
     }
-} // Minikit.AbilitySystem namespace
+}

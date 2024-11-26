@@ -1,80 +1,80 @@
+using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Minikit.AbilitySystem.Internal;
 
 namespace Minikit.AbilitySystem
 {
-    public abstract class MKAbility
+    [GlobalClass]
+    public partial class MKAbility : Resource
     {
         // ----- INTERNAL -----
         // --------------------
         public static string __typeTagFieldName = "__typeTag"; // NOTE: Internal, do not edit
-        public static MKTag __typeTag = null; // Override in child classes with the new keyword
+        public static Tag __typeTag = null; // Override in child classes with the new keyword
         // ------------------------
         // ----- END INTERNAL -----
 
         // ----- SETTINGS -----
         // --------------------
         /// <summary> A unique tag for this ability's class type </summary>
-        public MKTag typeTag { get; private set; } = null;
+        public Tag TypeTag { get; private set; } = null;
         /// <summary> Tags that are granted to the owning MASComponent while this ability is active </summary>
-        public List<MKTag> grantedTags { get; } = new();
+        public List<Tag> GrantedTags { get; } = new();
         /// <summary> This ability cannot be activated if the owning MASComponent has any of these tags </summary>
-        public List<MKTag> blockedByTags { get; } = new();
+        public List<Tag> BlockedByTags { get; } = new();
         /// <summary> When this ability is activated successfully, any active abilities on the owning MASComponent that matches one of these tags will be cancelled </summary>
-        public List<MKTag> cancelAbilityTags { get; } = new();
+        public List<Tag> CancelAbilityTags { get; } = new();
         /// <summary> Tags that, when granted to the owning MASComponent, will cancel this ability (only includes grantedLooseTags) </summary>
-        public List<MKTag> cancelledByGrantedLooseTags { get; } = new();
+        public List<Tag> CancelledByGrantedLooseTags { get; } = new();
         /// <summary> The tag for the effect used to track this ability's cooldown </summary>
-        public MKTag cooldownEffectTag { get; protected set; } = null;
+        public Tag CooldownEffectTag { get; protected set; } = null;
         // -----------------------
         // ----- END SETTINGS -----
 
         // ----- INSTANCE -----
         // --------------------
-        public MKAbilityComponent abilityComponent { get; private set; } = null;
-        public bool active { get; private set; } = false;
-        protected object[] activationParams;
+        public MKAbilityComponent AbilityComponent { get; private set; } = null;
+        public bool Active { get; private set; } = false;
+        protected object[] ActivationParams;
         // ------------------------
         // ----- END INSTANCE -----
 
-
-        public MKAbility(MKTag _typeTag)
+        public MKAbility(Tag typeTag)
         {
-            typeTag = _typeTag;
+            TypeTag = typeTag;
         }
         public void OnPostConstruct()
         {
-            if (cooldownEffectTag != null)
+            if (CooldownEffectTag != null)
             {
-                blockedByTags.Add(cooldownEffectTag);
+                BlockedByTags.Add(CooldownEffectTag);
             }
         }
 
 
-        public void Tick(float _deltaTime)
+        public void Tick(double deltaTime)
         {
-            if (active)
+            if (Active)
             {
-                OnActiveTick(_deltaTime);
+                OnActiveTick(deltaTime);
             }
         }
 
-        protected virtual void OnActiveTick(float _deltaTime)
+        protected virtual void OnActiveTick(double deltaTime)
         {
 
         }
 
         public virtual bool CanActivate()
         {
-            if (abilityComponent == null)
+            if (AbilityComponent == null)
             {
                 return false;
             }
 
-            if (abilityComponent.HasAnyGrantedTags(blockedByTags))
+            if (AbilityComponent.HasAnyGrantedTags(BlockedByTags))
             {
                 return false;
             }
@@ -82,16 +82,16 @@ namespace Minikit.AbilitySystem
             return true;
         }
 
-        public void Activate(params object[] _params)
+        public void Activate(params object[] @params)
         {
-            activationParams = _params;
+            ActivationParams = @params;
 
-            active = true;
+            Active = true;
 
-            List<MKTag> cancelledAbilities = abilityComponent.GetAllActiveAbilitiesWithTags(cancelAbilityTags);
+            List<Tag> cancelledAbilities = AbilityComponent.GetAllActiveAbilitiesWithTags(CancelAbilityTags);
             if (cancelledAbilities.Count > 0)
             {
-                abilityComponent.CancelAbilities(cancelledAbilities);
+                AbilityComponent.CancelAbilities(cancelledAbilities);
             }
 
             OnActivate();
@@ -104,9 +104,9 @@ namespace Minikit.AbilitySystem
 
         public void End()
         {
-            if (active)
+            if (Active)
             {
-                active = false;
+                Active = false;
 
                 OnEnd(false);
             }
@@ -114,30 +114,30 @@ namespace Minikit.AbilitySystem
 
         public void Cancel()
         {
-            if (active)
+            if (Active)
             {
-                active = false;
+                Active = false;
 
                 OnEnd(true);
             }
         }
 
-        protected virtual void OnEnd(bool _cancelled)
+        protected virtual void OnEnd(bool cancelled)
         {
 
         }
 
         protected void StartCooldown()
         {
-            if (cooldownEffectTag != null)
+            if (CooldownEffectTag != null)
             {
-                abilityComponent.AddEffect(MKEffect.Create(cooldownEffectTag));
+                AbilityComponent.AddEffect(MKEffect.Create(CooldownEffectTag));
             }
         }
 
-        public void Added(MKAbilityComponent _abilityComponent)
+        public void Added(MKAbilityComponent abilityComponent)
         {
-            abilityComponent = _abilityComponent;
+            AbilityComponent = abilityComponent;
 
             OnAdded();
         }
@@ -147,9 +147,9 @@ namespace Minikit.AbilitySystem
 
         }
 
-        public void Removed(MKAbilityComponent _abilityComponent)
+        public void Removed(MKAbilityComponent abilityComponent)
         {
-            abilityComponent = null;
+            AbilityComponent = null;
 
             Cancel();
             OnRemoved();
@@ -160,33 +160,32 @@ namespace Minikit.AbilitySystem
 
         }
 
-        public static MKAbility Create(MKTag _typeTag)
+        public static MKAbility Create(Tag typeTag)
         {
-            return Create<MKAbility>(_typeTag);
+            return Create<MKAbility>(typeTag);
         }
 
-        public static T Create<T>(MKTag _typeTag) where T : MKAbility
+        public static T Create<T>(Tag typeTag) where T : MKAbility
         {
-            Type abilityType = MKAbilityReflector.GetRegisteredAbilityType(_typeTag);
+            Type abilityType = MKAbilityReflector.GetRegisteredAbilityType(typeTag);
             if (abilityType != null)
             {
-                T abilityInstance = Activator.CreateInstance(abilityType, _typeTag) as T;
-                if (abilityInstance != null)
+                if (Activator.CreateInstance(abilityType, typeTag) is T abilityInstance)
                 {
                     abilityInstance.OnPostConstruct();
                     return abilityInstance;
                 }
                 else
                 {
-                    Debug.LogError($"Failed to create instance of {typeof(MKAbility).Name} because created instance was null");
+                    GD.PrintErr($"Failed to create instance of {nameof(MKAbility)} because created instance was null");
                     return null;
                 }
             }
             else
             {
-                Debug.LogError($"Failed to create instance of {typeof(MKAbility).Name} because type was null");
+                GD.PrintErr($"Failed to create instance of {nameof(MKAbility)} because type was null");
                 return null;
             }
         }
     }
-} // Minikit.AbilitySystem namespace
+}

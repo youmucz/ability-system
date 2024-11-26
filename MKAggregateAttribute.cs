@@ -1,72 +1,71 @@
-using System.Collections;
+using System;
+using Godot;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
 
 namespace Minikit.AbilitySystem
 {
     /// <summary> Aggregate attributes can add and remove modifiers as desired. Best use cases for aggregate attributes are values that don't change their base, but will be modifier and unmodifier often </summary>
     public class MKAggregateAttribute
     {
-        public UnityEvent<float, float> OnBaseValueChanged = new();
-        public UnityEvent<float, float> OnCurrentValueChanged = new();
+        public readonly Action<float, float> OnBaseValueChanged = delegate { };
+        public readonly Action<float, float> OnCurrentValueChanged = delegate { };
 
-        public MKTag tag { get; private set; }
-        public float baseValue { get; private set; }
-        public float currentValue { get; private set; }
+        public Tag Tag { get; private set; }
+        public float BaseValue { get; private set; }
+        public float CurrentValue { get; private set; }
 
-        private Dictionary<MKTag, MKModifier> modifiers = new();
+        private readonly Dictionary<Tag, MKModifier> _modifiers = new();
 
 
-        public MKAggregateAttribute(MKTag _tag, float _value)
+        public MKAggregateAttribute(Tag tag, float value)
         {
-            tag = _tag;
-            baseValue = _value;
-            currentValue = baseValue;
+            Tag = tag;
+            BaseValue = value;
+            CurrentValue = BaseValue;
         }
 
 
-        public void SetBaseValue(float _value)
+        public void SetBaseValue(float value)
         {
-            if (baseValue == _value)
+            if (Math.Abs(BaseValue - value) < float.Epsilon)
             {
                 return;
             }
 
-            float oldBaseValue = baseValue;
-            baseValue = _value;
-            OnBaseValueChanged.Invoke(oldBaseValue, baseValue);
+            var oldBaseValue = BaseValue;
+            BaseValue = value;
+            OnBaseValueChanged.Invoke(oldBaseValue, BaseValue);
             UpdateCurrentValue();
         }
 
-        public bool ApplyModifier(MKModifier _modifier)
+        public bool ApplyModifier(MKModifier modifier)
         {
-            if (modifiers.ContainsKey(_modifier.tag))
+            if (_modifiers.ContainsKey(modifier.Tag))
             {
                 // This modifier has already been applied
                 return false;
             }
 
-            modifiers.Add(_modifier.tag, _modifier);
+            _modifiers.Add(modifier.Tag, modifier);
             UpdateCurrentValue();
 
             return true;
         }
 
-        public bool RemoveModifier(MKModifier _modifier)
+        public bool RemoveModifier(MKModifier modifier)
         {
-            return RemoveModifierByTag(_modifier.tag);
+            return RemoveModifierByTag(modifier.Tag);
         }
 
-        public bool RemoveModifierByTag(MKTag _tag)
+        public bool RemoveModifierByTag(Tag tag)
         {
-            if (!modifiers.ContainsKey(_tag))
+            if (!_modifiers.ContainsKey(tag))
             {
                 // There is no modifier with this tag
                 return false;
             }
 
-            modifiers.Remove(_tag);
+            _modifiers.Remove(tag);
             UpdateCurrentValue();
 
             return true;
@@ -74,37 +73,37 @@ namespace Minikit.AbilitySystem
 
         private void UpdateCurrentValue()
         {
-            float oldCurrentValue = currentValue;
-            float newCurrentValueBase = baseValue;
-            float newCurrentValueMultiplier = 1f;
+            var oldCurrentValue = CurrentValue;
+            var newCurrentValueBase = BaseValue;
+            var newCurrentValueMultiplier = 1f;
             Stack<float> newCurrentValueOverride = new();
 
-            foreach (MKModifier modifier in modifiers.Values)
+            foreach (MKModifier modifier in _modifiers.Values)
             {
-                switch (modifier.operation)
+                switch (modifier.Operation)
                 {
                     case MKModifierOperation.Add:
-                        newCurrentValueBase += modifier.value;
+                        newCurrentValueBase += modifier.Value;
                         break;
                     case MKModifierOperation.Multiply:
-                        newCurrentValueMultiplier *= modifier.value;
+                        newCurrentValueMultiplier *= modifier.Value;
                         break;
                     case MKModifierOperation.Override:
-                        newCurrentValueOverride.Push(modifier.value);
+                        newCurrentValueOverride.Push(modifier.Value);
                         break;
                 }
             }
 
             if (newCurrentValueOverride.Count > 0)
             {
-                currentValue = newCurrentValueOverride.Pop();
+                CurrentValue = newCurrentValueOverride.Pop();
             }
             else
             {
-                currentValue = newCurrentValueBase * newCurrentValueMultiplier;
+                CurrentValue = newCurrentValueBase * newCurrentValueMultiplier;
             }
 
-            OnCurrentValueChanged.Invoke(oldCurrentValue, currentValue);
+            OnCurrentValueChanged.Invoke(oldCurrentValue, CurrentValue);
         }
     }
-} // Minikit.AbilitySystem namespace
+}

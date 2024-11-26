@@ -1,55 +1,53 @@
+using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Minikit.AbilitySystem.Internal;
 
 namespace Minikit.AbilitySystem
 {
-    public abstract class MKEffect
+    public partial class MKEffect : Node
     {
         // ----- INTERNAL -----
         // --------------------
         public static string __typeTagFieldName = "__typeTag"; // NOTE: Internal, do not edit
-        public static MKTag __typeTag = null; // Override in child classes with the new keyword
+        public static Tag __typeTag = null; // Override in child classes with the new keyword
         // ------------------------
         // ----- END INTERNAL -----
 
         // ----- SETTINGS -----
         // --------------------
         /// <summary> A unique tag for this ability's class type </summary>
-        public MKTag typeTag { get; private set; } = null;
+        public Tag TypeTag { get; private set; } = null;
         /// <summary> Tags that are granted to the owning MASComponent while this effect is applied </summary>
-        public List<MKTag> grantedTags { get; } = new();
-        public int maxStacks { get; protected set; } = 1; // -1 for infinite
-        protected float duration = 0f;
+        public List<Tag> GrantedTags { get; } = new();
+        public int MaxStacks { get; protected set; } = 1; // -1 for infinite
+        protected readonly float Duration = 0f;
         // ------------------------
         // ----- END SETTINGS -----
 
         // ----- INSTANCE -----
         // --------------------
-        public int stacks { get; private set; } = 0;
+        public int Stacks { get; private set; } = 0;
 
-        protected MKAbilityComponent abilityComponent;
-        protected float timeOfApplied = 0f;
+        protected MKAbilityComponent AbilityComponent;
+        protected float TimeOfApplied = 0f;
         // ------------------------
         // ----- END INSTANCE -----
-
-
-        public MKEffect(MKTag _typeTag)
+        
+        public MKEffect(Tag typeTag)
         {
-            typeTag = _typeTag;
+            TypeTag = typeTag;
         }
         public void PostConstruct()
         {
 
         }
-
-
-        public void Added(MKAbilityComponent _abilityComponent)
+        
+        public void Added(MKAbilityComponent abilityComponent)
         {
-            abilityComponent = _abilityComponent;
-            timeOfApplied = Time.time;
+            AbilityComponent = abilityComponent;
+            TimeOfApplied = GetTime();
 
             OnAdded();
         }
@@ -58,18 +56,23 @@ namespace Minikit.AbilitySystem
         {
 
         }
-
-        public void Tick(float _deltaTime)
+        
+        public float GetTime()
         {
-            OnActiveTick(_deltaTime);
+            return (float)(Time.GetTicksUsec() / 1000000.0);
+        }
+
+        public void Tick(double deltaTime)
+        {
+            OnActiveTick(deltaTime);
 
             if (GetDurationRemaining() < 0f)
             {
-                abilityComponent.RemoveEffect(typeTag);
+                AbilityComponent.RemoveEffect(TypeTag);
             }
         }
 
-        protected virtual void OnActiveTick(float _deltaTime)
+        protected virtual void OnActiveTick(double deltaTime)
         {
 
         }
@@ -84,65 +87,63 @@ namespace Minikit.AbilitySystem
 
         }
 
-        public virtual int AddStacks(int _stacks)
+        public virtual int AddStacks(int stacks)
         {
-            if (_stacks <= 0)
+            if (stacks <= 0)
             {
                 return 0;
             }
 
-            int oldStacks = stacks;
-            stacks = Mathf.Clamp(stacks + _stacks, 0, maxStacks == -1 ? int.MaxValue : maxStacks);
+            int oldStacks = Stacks;
+            Stacks = Mathf.Clamp(Stacks + stacks, 0, MaxStacks == -1 ? int.MaxValue : MaxStacks);
 
-            return stacks - oldStacks;
+            return Stacks - oldStacks;
         }
 
-        public virtual int RemoveStacks(int _stacks)
+        public virtual int RemoveStacks(int stacks)
         {
-            if (_stacks <= 0)
+            if (stacks <= 0)
             {
                 return 0;
             }
 
-            int oldStacks = stacks;
-            stacks = Mathf.Clamp(stacks - _stacks, 0, maxStacks == -1 ? int.MaxValue : maxStacks);
+            int oldStacks = Stacks;
+            Stacks = Mathf.Clamp(Stacks - stacks, 0, MaxStacks == -1 ? int.MaxValue : MaxStacks);
 
-            return oldStacks - stacks;
+            return oldStacks - Stacks;
         }
 
         public float GetDuration()
         {
-            return duration;
+            return Duration;
         }
 
         public float GetDurationRemaining()
         {
-            return GetDuration() - (Time.time - timeOfApplied);
+            return GetDuration() - (GetTime() - TimeOfApplied);
         }
 
-
-        public static MKEffect Create(MKTag _typeTag)
+        public static MKEffect Create(Tag typeTag)
         {
-            Type effectType = MKAbilityReflector.GetRegisteredEffectType(_typeTag);
+            Type effectType = MKAbilityReflector.GetRegisteredEffectType(typeTag);
             if (effectType != null)
             {
-                MKEffect effectInstance = Activator.CreateInstance(effectType, _typeTag) as MKEffect;
-                if (effectInstance != null)
+                if (Activator.CreateInstance(effectType, typeTag) is MKEffect effectInstance)
                 {
                     effectInstance.PostConstruct();
                     return effectInstance;
                 }
                 else
                 {
-                    Debug.LogError($"Failed to create instance of {typeof(MKEffect).Name} because created instance was null");
+                    GD.PrintErr($"Failed to create instance of {nameof(MKEffect)} because created instance was null");
                     return null;
                 }
             }
             else
             {
-                Debug.LogError($"Failed to create instance of {typeof(MKEffect).Name} because type was null");
+                GD.PrintErr($"Failed to create instance of {nameof(MKEffect)} because type was null");
                 return null;
             }
         }
     }
-} // Minikit.AbilitySystem namespace
+}
